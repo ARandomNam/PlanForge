@@ -1,0 +1,115 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./planforge.db"
+}
+
+model Plan {
+  id          String   @id @default(cuid())
+  title       String
+  description String?
+  goal        String   // Original user goal input
+  timeframe   String?  // e.g., "3 months", "2 weeks"
+  status      String   @default("ACTIVE") // ACTIVE, COMPLETED, PAUSED, CANCELLED
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  // Relations
+  milestones  Milestone[]
+  tasks       Task[]
+  resources   Resource[]
+  
+  @@map("plans")
+}
+
+model Milestone {
+  id          String   @id @default(cuid())
+  title       String
+  description String?
+  targetDate  DateTime?
+  status      String   @default("TODO") // TODO, IN_PROGRESS, COMPLETED, CANCELLED
+  order       Int      // Display order
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  // Relations
+  planId      String
+  plan        Plan     @relation(fields: [planId], references: [id], onDelete: Cascade)
+  tasks       Task[]
+  
+  @@map("milestones")
+}
+
+model Task {
+  id           String   @id @default(cuid())
+  title        String
+  description  String?
+  status       String   @default("TODO") // TODO, IN_PROGRESS, COMPLETED, CANCELLED
+  priority     String   @default("MEDIUM") // LOW, MEDIUM, HIGH, URGENT
+  estimatedHours Int?   // Estimated time in hours
+  actualHours    Int?   // Actual time spent
+  dueDate      DateTime?
+  completedAt  DateTime?
+  order        Int      // Display order within milestone
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  
+  // Relations
+  planId       String
+  plan         Plan     @relation(fields: [planId], references: [id], onDelete: Cascade)
+  milestoneId  String?
+  milestone    Milestone? @relation(fields: [milestoneId], references: [id], onDelete: SetNull)
+  
+  // Task dependencies
+  dependsOn    TaskDependency[] @relation("DependentTask")
+  dependencies TaskDependency[] @relation("PrerequisiteTask")
+  
+  @@map("tasks")
+}
+
+model TaskDependency {
+  id             String @id @default(cuid())
+  
+  // Relations
+  dependentId    String
+  dependent      Task   @relation("DependentTask", fields: [dependentId], references: [id], onDelete: Cascade)
+  prerequisiteId String
+  prerequisite   Task   @relation("PrerequisiteTask", fields: [prerequisiteId], references: [id], onDelete: Cascade)
+  
+  @@unique([dependentId, prerequisiteId])
+  @@map("task_dependencies")
+}
+
+model Resource {
+  id          String   @id @default(cuid())
+  title       String
+  description String?
+  url         String?  // Link to external resource
+  type        String   // ARTICLE, VIDEO, BOOK, COURSE, TOOL, OTHER
+  createdAt   DateTime @default(now())
+  
+  // Relations
+  planId      String
+  plan        Plan     @relation(fields: [planId], references: [id], onDelete: Cascade)
+  
+  @@map("resources")
+}
+
+model Settings {
+  id          String   @id @default("settings")
+  openaiApiKey String? // Encrypted API key
+  theme       String   @default("LIGHT") // LIGHT, DARK, SYSTEM
+  language    String   @default("en")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  @@map("settings")
+}
+
+ 

@@ -1,0 +1,38 @@
+{
+  "name": "planforge",
+  "version": "1.0.0",
+  "description": "AI-driven goal decomposition and task management desktop application",
+  "private": true,
+  "workspaces": [
+    "apps/desktop",
+    "apps/website"
+  ],
+  "scripts": {
+    "dev:desktop": "npm run dev --workspace=apps/desktop",
+    "dev:website": "npm run dev --workspace=apps/website",
+    "build:desktop": "npm run build --workspace=apps/desktop",
+    "build:website": "npm run build --workspace=apps/website",
+    "build:all": "npm run build:desktop && npm run build:website",
+    "test": "npm run test --workspaces",
+    "lint": "npm run lint --workspaces",
+    "type-check": "npm run type-check --workspaces"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "typescript": "^5.0.0"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=9.0.0"
+  },
+  "keywords": [
+    "ai",
+    "task-management",
+    "goal-planning",
+    "electron",
+    "desktop-app",
+    "productivity"
+  ],
+  "author": "Your Name",
+  "license": "MIT"
+}
