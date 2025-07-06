@@ -254,6 +254,82 @@ async function seedData() {
       }),
     ]);
 
+    // Create tasks for Plan 3 (Mobile App - completed)
+    const tasks3 = await Promise.all([
+      prisma.task.create({
+        data: {
+          title: "Setup React Native development environment",
+          description:
+            "Install and configure React Native CLI, Android Studio, and Xcode",
+          status: "COMPLETED",
+          priority: "HIGH",
+          estimatedHours: 8,
+          actualHours: 10,
+          dueDate: new Date("2023-09-15"),
+          completedAt: new Date("2023-09-14"),
+          order: 1,
+          planId: plan3.id,
+        },
+      }),
+      prisma.task.create({
+        data: {
+          title: "Design app UI/UX",
+          description:
+            "Create wireframes and design mockups for the mobile app",
+          status: "COMPLETED",
+          priority: "HIGH",
+          estimatedHours: 20,
+          actualHours: 25,
+          dueDate: new Date("2023-10-01"),
+          completedAt: new Date("2023-09-30"),
+          order: 2,
+          planId: plan3.id,
+        },
+      }),
+      prisma.task.create({
+        data: {
+          title: "Implement core features",
+          description: "Build main app functionality and navigation",
+          status: "COMPLETED",
+          priority: "HIGH",
+          estimatedHours: 40,
+          actualHours: 45,
+          dueDate: new Date("2023-11-15"),
+          completedAt: new Date("2023-11-12"),
+          order: 3,
+          planId: plan3.id,
+        },
+      }),
+      prisma.task.create({
+        data: {
+          title: "Testing and debugging",
+          description: "Comprehensive testing on iOS and Android devices",
+          status: "COMPLETED",
+          priority: "MEDIUM",
+          estimatedHours: 15,
+          actualHours: 18,
+          dueDate: new Date("2023-12-01"),
+          completedAt: new Date("2023-11-28"),
+          order: 4,
+          planId: plan3.id,
+        },
+      }),
+      prisma.task.create({
+        data: {
+          title: "App Store submission",
+          description: "Prepare and submit app to App Store and Google Play",
+          status: "COMPLETED",
+          priority: "HIGH",
+          estimatedHours: 8,
+          actualHours: 12,
+          dueDate: new Date("2023-12-15"),
+          completedAt: new Date("2023-12-10"),
+          order: 5,
+          planId: plan3.id,
+        },
+      }),
+    ]);
+
     // Create task dependencies
     console.log("🔗 Creating task dependencies...");
     await prisma.taskDependency.create({
@@ -343,7 +419,7 @@ async function seedData() {
     console.log(`📊 Created:`);
     console.log(`   - ${3} plans`);
     console.log(`   - ${5} milestones`);
-    console.log(`   - ${9} tasks`);
+    console.log(`   - ${14} tasks`);
     console.log(`   - ${3} task dependencies`);
     console.log(`   - ${5} resources`);
     console.log(`   - Default settings`);

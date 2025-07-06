@@ -34,7 +34,12 @@ const Dashboard: React.FC = () => {
   };
 
   const calculatePlanProgress = (plan: Plan) => {
+    // If plan is completed, show 100% regardless of tasks
+    if (plan.status === "COMPLETED") return 100;
+
+    // If no tasks, show 0% for non-completed plans
     if (!plan.tasks || plan.tasks.length === 0) return 0;
+
     const completedTasks = plan.tasks.filter(
       (task) => task.status === "COMPLETED"
     ).length;
@@ -59,7 +64,7 @@ const Dashboard: React.FC = () => {
   return (
     <div className="p-6 space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between theme-transition-top">
         <div>
           <h1 className="text-3xl font-bold text-foreground">Dashboard</h1>
           <p className="text-muted-foreground mt-1">
@@ -76,7 +81,7 @@ const Dashboard: React.FC = () => {
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 theme-transition-middle">
         <div className="bg-card p-6 rounded-lg border border-border">
           <div className="flex items-center space-x-3">
             <div className="p-2 bg-blue-100 rounded-lg">
@@ -145,7 +150,7 @@ const Dashboard: React.FC = () => {
 
       {/* Plans List */}
       {!loading && !error && (
-        <div className="space-y-4">
+        <div className="space-y-4 theme-transition-bottom">
           <h2 className="text-xl font-semibold text-foreground">Your Plans</h2>
 
           {plans.length === 0 ? (
@@ -229,12 +234,18 @@ const Dashboard: React.FC = () => {
                       Created {new Date(plan.createdAt).toLocaleDateString()}
                     </div>
                     <div className="space-x-2">
-                      <button className="text-sm text-primary hover:text-primary/80 transition-colors">
+                      <Link
+                        to={`/plan/${plan.id}`}
+                        className="text-sm text-primary hover:text-primary/80 transition-colors"
+                      >
                         View Tasks
-                      </button>
-                      <button className="text-sm text-primary hover:text-primary/80 transition-colors">
+                      </Link>
+                      <Link
+                        to={`/plan/${plan.id}`}
+                        className="text-sm text-primary hover:text-primary/80 transition-colors"
+                      >
                         Edit Plan
-                      </button>
+                      </Link>
                     </div>
                   </div>
                 </div>

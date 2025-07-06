@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useReducer, useEffect } from "react";
-import { Plan, Task, Milestone, Settings } from "../types";
+import { Plan, Task, Milestone, Settings, db } from "../lib/database-api";
 
 interface PlanState {
   plans: Plan[];
@@ -123,9 +123,8 @@ export const PlanProvider: React.FC<PlanProviderProps> = ({ children }) => {
   const loadPlans = async () => {
     try {
       dispatch({ type: "SET_LOADING", payload: true });
-      // TODO: Implement database calls via IPC
-      console.log("Loading plans...");
-      dispatch({ type: "SET_PLANS", payload: [] as any });
+      const plans = await db.getPlans();
+      dispatch({ type: "SET_PLANS", payload: plans });
     } catch (error) {
       console.error("Failed to load plans:", error);
       dispatch({ type: "SET_ERROR", payload: "Failed to load plans" });
@@ -136,8 +135,15 @@ export const PlanProvider: React.FC<PlanProviderProps> = ({ children }) => {
 
   const loadTasks = async (planId?: string) => {
     try {
-      console.log("Loading tasks...", planId);
-      dispatch({ type: "SET_TASKS", payload: [] as any });
+      if (planId) {
+        const plan = await db.getPlan(planId);
+        dispatch({ type: "SET_TASKS", payload: plan?.tasks || [] });
+      } else {
+        // Load all tasks across all plans
+        const plans = await db.getPlans();
+        const allTasks = plans.flatMap((plan) => plan.tasks || []);
+        dispatch({ type: "SET_TASKS", payload: allTasks });
+      }
     } catch (error) {
       console.error("Failed to load tasks:", error);
       dispatch({ type: "SET_ERROR", payload: "Failed to load tasks" });
@@ -146,8 +152,15 @@ export const PlanProvider: React.FC<PlanProviderProps> = ({ children }) => {
 
   const loadMilestones = async (planId?: string) => {
     try {
-      console.log("Loading milestones...", planId);
-      dispatch({ type: "SET_MILESTONES", payload: [] as any });
+      if (planId) {
+        const plan = await db.getPlan(planId);
+        dispatch({ type: "SET_MILESTONES", payload: plan?.milestones || [] });
+      } else {
+        // Load all milestones across all plans
+        const plans = await db.getPlans();
+        const allMilestones = plans.flatMap((plan) => plan.milestones || []);
+        dispatch({ type: "SET_MILESTONES", payload: allMilestones });
+      }
     } catch (error) {
       console.error("Failed to load milestones:", error);
       dispatch({ type: "SET_ERROR", payload: "Failed to load milestones" });
@@ -156,19 +169,26 @@ export const PlanProvider: React.FC<PlanProviderProps> = ({ children }) => {
 
   const loadSettings = async () => {
     try {
-      console.log("Loading settings...");
-      dispatch({ type: "SET_SETTINGS", payload: null as any });
+      const settings = await db.getSettings();
+      dispatch({ type: "SET_SETTINGS", payload: settings });
     } catch (error) {
       console.error("Failed to load settings:", error);
       dispatch({ type: "SET_ERROR", payload: "Failed to load settings" });
     }
   };
 
-  const createPlan = async (planData: any) => {
+  const createPlan = async (
+    planData: Omit<Plan, "id" | "createdAt" | "updatedAt">
+  ) => {
     try {
       dispatch({ type: "SET_LOADING", payload: true });
-      console.log("Creating plan...", planData);
-      // TODO: Implement via IPC
+      const newPlan = await db.createPlan({
+        title: planData.title,
+        description: planData.description,
+        goal: planData.goal,
+        timeframe: planData.timeframe,
+      });
+      dispatch({ type: "ADD_PLAN", payload: newPlan });
     } catch (error) {
       console.error("Failed to create plan:", error);
       dispatch({ type: "SET_ERROR", payload: "Failed to create plan" });
@@ -179,8 +199,11 @@ export const PlanProvider: React.FC<PlanProviderProps> = ({ children }) => {
 
   const updateTaskStatus = async (taskId: string, status: string) => {
     try {
-      console.log("Updating task status...", taskId, status);
-      // TODO: Implement via IPC
+      const updatedTask = await db.updateTask(taskId, {
+        status,
+        completedAt: status === "COMPLETED" ? new Date() : undefined,
+      });
+      dispatch({ type: "UPDATE_TASK", payload: updatedTask });
     } catch (error) {
       console.error("Failed to update task status:", error);
       dispatch({ type: "SET_ERROR", payload: "Failed to update task status" });

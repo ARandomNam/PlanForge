@@ -29,9 +29,9 @@
   .dark {
     --background: 222.2 84% 4.9%;
     --foreground: 210 40% 98%;
-    --card: 222.2 84% 4.9%;
+    --card: 217.2 32.6% 15.5%;
     --card-foreground: 210 40% 98%;
-    --popover: 222.2 84% 4.9%;
+    --popover: 217.2 32.6% 15.5%;
     --popover-foreground: 210 40% 98%;
     --primary: 217.2 91.2% 59.8%;
     --primary-foreground: 222.2 84% 4.9%;
@@ -53,6 +53,150 @@
   * {
     @apply border-border;
   }
+
+  /* 为主题相关元素添加统一的过渡效果 - 从上到下的波纹效果 */
+  html {
+    transition: background-color 0.3s ease-in-out;
+  }
+
+  /* 顶部元素（如侧边栏顶部）- 最先变化 */
+  .theme-transition-top {
+    transition: background-color 0.15s ease-out, border-color 0.15s ease-out,
+      color 0.15s ease-out;
+    transition-delay: 0ms;
+  }
+
+  /* 中部元素（如导航区域）- 稍后变化 */
+  .theme-transition-middle {
+    transition: background-color 0.15s ease-out, border-color 0.15s ease-out,
+      color 0.15s ease-out;
+    transition-delay: 50ms;
+  }
+
+  /* 底部元素（如侧边栏底部、主内容区域）- 最后变化 */
+  .theme-transition-bottom {
+    transition: background-color 0.15s ease-out, border-color 0.15s ease-out,
+      color 0.15s ease-out;
+    transition-delay: 100ms;
+  }
+
+  /* 主内容区域 - 延迟最多，创建从上到下的效果 */
+  .theme-transition-content {
+    transition: background-color 0.2s ease-out, border-color 0.2s ease-out,
+      color 0.2s ease-out;
+    transition-delay: 150ms;
+  }
+
+  /* 为使用主题变量的元素添加过渡，但排除已有特定 transition 的元素 */
+  *:not([class*="transition-"]):not([class*="animate-"]):not(
+      [class*="theme-transition-"]
+    ) {
+    transition: background-color 0.2s ease-in-out, border-color 0.2s ease-in-out,
+      color 0.15s ease-in-out;
+  }
+
+  /* 为已有 transition 类的元素添加颜色过渡 */
+  [class*="transition-colors"] {
+    transition: background-color 0.2s ease-in-out, border-color 0.2s ease-in-out,
+      color 0.15s ease-in-out !important;
+  }
+
+  /* 侧边栏文字快速过渡 - 直接指定颜色而不依赖CSS变量 */
+  .sidebar-text {
+    color: hsl(222.2, 84%, 4.9%);
+    transition: color 0.15s ease-out !important;
+  }
+
+  .dark .sidebar-text {
+    color: hsl(210, 40%, 98%) !important;
+  }
+
+  /* 侧边栏图标快速过渡 */
+  .sidebar-icon {
+    color: hsl(221.2, 83.2%, 53.3%);
+    transition: color 0.15s ease-out !important;
+  }
+
+  .dark .sidebar-icon {
+    color: hsl(217.2, 91.2%, 59.8%) !important;
+  }
+
+  /* 侧边栏背景快速过渡 - 遵循从上到下的模式 */
+  .sidebar-bg {
+    background-color: hsl(0, 0%, 100%);
+    border-color: hsl(214.3, 31.8%, 91.4%);
+    transition: background-color 0.2s ease-out, border-color 0.2s ease-out !important;
+    transition-delay: 25ms; /* 介于顶部和中部之间 */
+  }
+
+  .dark .sidebar-bg {
+    background-color: hsl(217.2, 32.6%, 15.5%) !important;
+    border-color: hsl(217.2, 32.6%, 17.5%) !important;
+  }
+
+  /* 侧边栏按钮快速过渡 */
+  .sidebar-button {
+    transition: background-color 0.15s ease-out, color 0.15s ease-out !important;
+  }
+
+  .sidebar-button:hover {
+    background-color: hsl(210, 40%, 96%);
+    color: hsl(222.2, 84%, 4.9%);
+  }
+
+  .dark .sidebar-button:hover {
+    background-color: hsl(217.2, 32.6%, 17.5%) !important;
+    color: hsl(210, 40%, 98%) !important;
+  }
+
+  /* 活跃的导航项 */
+  .sidebar-nav-active {
+    background-color: hsl(221.2, 83.2%, 53.3%);
+    color: hsl(210, 40%, 98%);
+  }
+
+  .dark .sidebar-nav-active {
+    background-color: hsl(217.2, 91.2%, 59.8%) !important;
+    color: hsl(222.2, 84%, 4.9%) !important;
+  }
+
+  /* 任务卡片暗色模式样式 */
+  .dark .task-card-todo {
+    background-color: hsl(217.2 32.6% 12%);
+    border-color: hsl(217.2 32.6% 20%);
+  }
+
+  .dark .task-card-in-progress {
+    background-color: hsl(217.2 91.2% 8%);
+    border-color: hsl(217.2 91.2% 15%);
+  }
+
+  .dark .task-card-paused {
+    background-color: hsl(45 93% 8%);
+    border-color: hsl(45 93% 15%);
+  }
+
+  .dark .task-card-completed {
+    background-color: hsl(142 76% 8%);
+    border-color: hsl(142 76% 15%);
+  }
+
+  /* 优先级标签暗色模式样式 */
+  .dark .priority-high {
+    background-color: hsl(0 84% 15%);
+    color: hsl(0 84% 85%);
+  }
+
+  .dark .priority-medium {
+    background-color: hsl(45 93% 15%);
+    color: hsl(45 93% 85%);
+  }
+
+  .dark .priority-low {
+    background-color: hsl(142 76% 15%);
+    color: hsl(142 76% 85%);
+  }
+
   body {
     @apply bg-background text-foreground;
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto",
