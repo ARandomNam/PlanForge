@@ -4,7 +4,6 @@ import {
   Calendar,
   Clock,
   Flag,
-  User,
   FileText,
   Save,
   Trash2,

@@ -2,16 +2,12 @@ import React, { useState, useEffect } from "react";
 import { useSearchParams, Link } from "react-router-dom";
 import {
   ArrowLeft,
-  Plus,
-  Filter,
   Search,
   CheckCircle,
   Circle,
   PlayCircle,
   PauseCircle,
   Calendar,
-  User,
-  MoreHorizontal,
   Target,
   FolderOpen,
 } from "lucide-react";

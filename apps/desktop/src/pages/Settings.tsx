@@ -15,7 +15,7 @@ import { db } from "../lib/database-api";
 import { useTheme } from "../contexts/ThemeContext";
 
 const Settings: React.FC = () => {
-  const { theme, setTheme, actualTheme } = useTheme();
+  const { theme, setTheme } = useTheme();
   const [apiKey, setApiKey] = useState("");
   const [showApiKey, setShowApiKey] = useState(false);
   const [language, setLanguage] = useState("en");
@@ -24,7 +24,6 @@ const Settings: React.FC = () => {
     "idle" | "success" | "error"
   >("idle");
   const [isSaving, setIsSaving] = useState(false);
-  const [loading, setLoading] = useState(true);
   const [isExporting, setIsExporting] = useState(false);
   const [isImporting, setIsImporting] = useState(false);
   const [exportSuccess, setExportSuccess] = useState(false);
@@ -36,15 +35,11 @@ const Settings: React.FC = () => {
 
   const loadSettings = async () => {
     try {
-      setLoading(true);
       const settings = await db.getSettings();
       setApiKey(settings.openaiApiKey || "");
-      // Don't set theme from database, use ThemeContext instead
       setLanguage(settings.language);
     } catch (error) {
       console.error("Failed to load settings:", error);
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -69,7 +64,6 @@ const Settings: React.FC = () => {
     setApiKeyStatus("idle");
 
     try {
-      // Import AI service dynamically to test API key
       const { aiService } = await import("../lib/ai-service");
       await aiService.initialize(apiKey.trim());
       setApiKeyStatus("success");
@@ -86,7 +80,6 @@ const Settings: React.FC = () => {
     try {
       await db.updateSettings({
         openaiApiKey: apiKey.trim() || undefined,
-        // Theme is now managed by ThemeContext and localStorage
         language,
       });
       console.log("Settings saved successfully");
@@ -102,7 +95,6 @@ const Settings: React.FC = () => {
     setExportSuccess(false);
 
     try {
-      // Get all data from database
       const plans = await db.getPlans();
       const settings = await db.getSettings();
 
@@ -114,12 +106,10 @@ const Settings: React.FC = () => {
           settings: {
             theme: settings.theme,
             language: settings.language,
-            // Don't export API key for security
           },
         },
       };
 
-      // Create and download file
       const dataStr = JSON.stringify(exportData, null, 2);
       const dataBlob = new Blob([dataStr], { type: "application/json" });
 
@@ -157,20 +147,11 @@ const Settings: React.FC = () => {
         const text = await file.text();
         const importData = JSON.parse(text);
 
-        // Validate import data structure
         if (!importData.data || !importData.data.plans) {
           throw new Error("Invalid backup file format");
         }
 
-        // Import plans (this would need to be implemented in the database service)
-        // For now, we'll just show success
         console.log("Import data:", importData);
-
-        // In a real implementation, you would:
-        // 1. Clear existing data (with user confirmation)
-        // 2. Import plans, milestones, tasks, resources
-        // 3. Import settings (except API key)
-        // 4. Refresh the application
 
         setImportSuccess(true);
         setTimeout(() => setImportSuccess(false), 3000);
@@ -187,7 +168,6 @@ const Settings: React.FC = () => {
 
   return (
     <div className="p-6 max-w-4xl mx-auto space-y-6">
-      {/* Header */}
       <div className="flex items-center space-x-3 mb-8">
         <SettingsIcon className="h-8 w-8 text-primary" />
         <div>
@@ -199,7 +179,6 @@ const Settings: React.FC = () => {
       </div>
 
       <div className="grid gap-6">
-        {/* API Configuration */}
         <div className="bg-card p-6 rounded-lg border border-border">
           <div className="flex items-center space-x-3 mb-4">
             <Key className="h-5 w-5 text-primary" />
@@ -240,7 +219,6 @@ const Settings: React.FC = () => {
                 </div>
               </div>
 
-              {/* API Key Status */}
               <div className="mt-2 flex items-center justify-between">
                 <div className="flex items-center space-x-2">
                   {apiKeyStatus === "success" && (
@@ -297,7 +275,6 @@ const Settings: React.FC = () => {
           </div>
         </div>
 
-        {/* Appearance */}
         <div className="bg-card p-6 rounded-lg border border-border">
           <div className="flex items-center space-x-3 mb-4">
             <Palette className="h-5 w-5 text-primary" />
@@ -363,7 +340,6 @@ const Settings: React.FC = () => {
           </div>
         </div>
 
-        {/* Data Management */}
         <div className="bg-card p-6 rounded-lg border border-border">
           <div className="flex items-center space-x-3 mb-4">
             <Download className="h-5 w-5 text-primary" />
@@ -411,7 +387,6 @@ const Settings: React.FC = () => {
               </button>
             </div>
 
-            {/* Success Messages */}
             {exportSuccess && (
               <div className="flex items-center space-x-2 p-3 bg-green-50 dark:bg-green-950 border border-green-200 dark:border-green-800 rounded-lg">
                 <Check className="h-4 w-4 text-green-600 dark:text-green-400" />
@@ -438,7 +413,6 @@ const Settings: React.FC = () => {
           </div>
         </div>
 
-        {/* Save Button */}
         <div className="flex justify-end">
           <button
             onClick={handleSaveSettings}

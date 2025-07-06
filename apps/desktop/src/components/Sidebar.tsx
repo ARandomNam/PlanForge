@@ -11,7 +11,6 @@ import {
   Calendar,
   Sun,
   Moon,
-  Monitor,
 } from "lucide-react";
 import { SidebarProps } from "../types";
 import { useTheme } from "../contexts/ThemeContext";

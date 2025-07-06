@@ -41,6 +41,13 @@ class AIService {
       throw new Error("OpenAI API key is required");
     }
 
+    // Validate API key format
+    if (!apiKey.startsWith("sk-")) {
+      throw new Error(
+        "Invalid API key format. OpenAI API keys should start with 'sk-'"
+      );
+    }
+
     this.openai = new OpenAI({
       apiKey: apiKey,
       dangerouslyAllowBrowser: true, // Note: In production, API calls should go through your backend
@@ -54,10 +61,32 @@ class AIService {
 
     // Test the API key
     try {
-      await this.openai.models.list();
+      console.log("Testing OpenAI API key...");
+      const models = await this.openai.models.list();
+      console.log(
+        `✅ API key valid. Found ${models.data.length} available models.`
+      );
       return true;
     } catch (error) {
       console.error("Failed to initialize OpenAI:", error);
+
+      // Provide more specific error messages
+      if (error instanceof Error) {
+        if (error.message.includes("401")) {
+          throw new Error(
+            "Invalid API key. Please check your OpenAI API key and try again."
+          );
+        } else if (error.message.includes("429")) {
+          throw new Error("API rate limit exceeded. Please try again later.");
+        } else if (error.message.includes("insufficient_quota")) {
+          throw new Error(
+            "Insufficient quota. Please check your OpenAI account billing."
+          );
+        } else {
+          throw new Error(`OpenAI API error: ${error.message}`);
+        }
+      }
+
       throw new Error("Invalid OpenAI API key or connection failed");
     }
   }

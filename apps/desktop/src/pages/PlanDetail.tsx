@@ -11,7 +11,6 @@ import {
   PauseCircle,
   AlertCircle,
   Calendar,
-  User,
   ExternalLink,
   Plus,
   MoreHorizontal,
@@ -19,13 +18,7 @@ import {
   Lightbulb,
   RefreshCw,
 } from "lucide-react";
-import {
-  db,
-  type Plan,
-  type Task,
-  type Milestone,
-  type Resource,
-} from "../lib/database-api";
+import { db, type Plan, type Task, type Milestone } from "../lib/database-api";
 import { aiService } from "../lib/ai-service";
 
 const PlanDetail: React.FC = () => {

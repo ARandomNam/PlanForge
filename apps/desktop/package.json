@@ -5,7 +5,7 @@
   "main": "dist-electron/main.js",
   "scripts": {
     "dev": "vite",
-    "build": "npm run type-check && vite build && electron-builder",
+    "build": "npm run type-check && vite build && node scripts/post-build.js && electron-builder",
     "build:unpack": "npm run type-check && vite build && electron-builder --dir",
     "build:win": "npm run type-check && vite build && electron-builder --win",
     "build:mac": "npm run type-check && vite build && electron-builder --mac",
@@ -64,7 +64,12 @@
     },
     "files": [
       "dist-electron",
-      "dist"
+      "dist",
+      "node_modules/@prisma/**/*"
+    ],
+    "asarUnpack": [
+      "dist-electron/.prisma/**/*",
+      "node_modules/@prisma/**/*"
     ],
     "mac": {
       "icon": "resources/icon.icns",

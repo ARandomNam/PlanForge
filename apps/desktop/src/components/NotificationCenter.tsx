@@ -62,7 +62,7 @@ const NotificationCenter: React.FC<NotificationCenterProps> = ({
     loadNotifications();
   };
 
-  const getNotificationIcon = (type: string, priority: string) => {
+  const getNotificationIcon = (type: string) => {
     switch (type) {
       case "overdue":
         return <AlertTriangle className="h-5 w-5 text-red-600" />;
@@ -214,10 +214,7 @@ const NotificationCenter: React.FC<NotificationCenterProps> = ({
                 >
                   <div className="flex items-start space-x-3">
                     <div className="flex-shrink-0 mt-0.5">
-                      {getNotificationIcon(
-                        notification.type,
-                        notification.priority
-                      )}
+                      {getNotificationIcon(notification.type)}
                     </div>
 
                     <div className="flex-1 min-w-0">

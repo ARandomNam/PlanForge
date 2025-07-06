@@ -1,4 +1,4 @@
-import { db, type Task, type Plan } from "./database-api";
+import { db } from "./database-api";
 
 export interface NotificationConfig {
   enableDueDateReminders: boolean;
@@ -32,9 +32,8 @@ class NotificationService {
   // Initialize the notification service
   async initialize() {
     try {
-      // Load configuration from settings or use defaults
-      const settings = await db.getSettings();
-      // In a real implementation, you would store notification settings in the database
+      // Get user notification preferences
+      // const settings = await db.getSettings();
       this.loadNotifications();
       this.scheduleNotificationCheck();
     } catch (error) {

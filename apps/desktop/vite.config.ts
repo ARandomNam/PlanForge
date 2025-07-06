@@ -21,7 +21,13 @@ export default defineConfig({
             minify: false,
             outDir: "dist-electron",
             rollupOptions: {
-              external: ["keytar", "sqlite3"],
+              external: [
+                "keytar",
+                "sqlite3",
+                "@prisma/client",
+                ".prisma/client",
+                "prisma",
+              ],
             },
           },
         },
@@ -37,7 +43,34 @@ export default defineConfig({
             minify: false,
             outDir: "dist-electron",
             rollupOptions: {
-              external: ["keytar", "sqlite3"],
+              external: [
+                "keytar",
+                "sqlite3",
+                "@prisma/client",
+                ".prisma/client",
+                "prisma",
+              ],
+            },
+          },
+        },
+      },
+      {
+        entry: "electron/database.ts",
+        onstart() {
+          // Database service doesn't need to restart on changes
+        },
+        vite: {
+          build: {
+            sourcemap: true,
+            minify: false,
+            outDir: "dist-electron",
+            rollupOptions: {
+              external: [
+                "@prisma/client",
+                ".prisma/client",
+                "prisma",
+                "sqlite3",
+              ],
             },
           },
         },
@@ -53,8 +86,14 @@ export default defineConfig({
   build: {
     outDir: "dist",
     emptyOutDir: true,
+    rollupOptions: {
+      external: ["@prisma/client", ".prisma/client", "prisma"],
+    },
   },
   server: {
     port: 5173,
+  },
+  optimizeDeps: {
+    exclude: ["@prisma/client", ".prisma/client", "prisma"],
   },
 });

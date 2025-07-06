@@ -1,4 +1,4 @@
-import { app, BrowserWindow, shell, ipcMain } from "electron";
+import { app, BrowserWindow, shell, ipcMain, dialog } from "electron";
 import { fileURLToPath } from "node:url";
 import path from "node:path";
 import os from "node:os";
@@ -42,10 +42,23 @@ if (!app.requestSingleInstanceLock()) {
 // }))
 
 let win: BrowserWindow | null = null;
-let db: DatabaseService;
+let db: DatabaseService | null = null;
+let dbInitialized = false;
+
 // Here, you can also use other preload
 const preload = path.join(__dirname, "preload.js");
 const url = process.env.VITE_DEV_SERVER_URL;
+
+// Helper function to check if database is available
+function ensureDatabase() {
+  if (!db || !dbInitialized) {
+    throw new Error(
+      "Database not initialized. Please restart the application."
+    );
+  }
+  return db;
+}
+
 async function createWindow() {
   win = new BrowserWindow({
     title: "PlanForge",
@@ -99,12 +112,34 @@ async function createWindow() {
 app.whenReady().then(async () => {
   // Initialize database
   try {
+    console.log("Initializing database...");
     db = new DatabaseService();
     await db.initialize();
+    dbInitialized = true;
     console.log("Database initialized successfully");
   } catch (error) {
     console.error("Failed to initialize database:", error);
-    // You might want to show an error dialog here
+
+    // Show error dialog
+    const result = await dialog.showMessageBox({
+      type: "error",
+      title: "Database Error",
+      message: "Failed to initialize database",
+      detail: `Error: ${
+        error instanceof Error ? error.message : String(error)
+      }\n\nThe application may not function correctly.`,
+      buttons: ["Continue Anyway", "Exit"],
+      defaultId: 1,
+      cancelId: 1,
+    });
+
+    if (result.response === 1) {
+      app.quit();
+      return;
+    }
+
+    // Continue without database (limited functionality)
+    dbInitialized = false;
   }
 
   createWindow();
@@ -155,7 +190,7 @@ ipcMain.handle("open-win", (_, arg) => {
 // Handle app quit
 app.on("before-quit", async () => {
   console.log("App is quitting");
-  if (db) {
+  if (db && dbInitialized) {
     await db.disconnect();
   }
 });
@@ -169,11 +204,27 @@ ipcMain.handle("get-platform", () => {
   return process.platform;
 });
 
+// Database test connection
+ipcMain.handle("db:test-connection", async () => {
+  try {
+    const database = ensureDatabase();
+    await database.initialize();
+    return { success: true };
+  } catch (error) {
+    console.error("Database connection test failed:", error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : String(error),
+    };
+  }
+});
+
 // Database IPC handlers
 // Plan operations
 ipcMain.handle("db:create-plan", async (_, data) => {
   try {
-    return await db.createPlan(data);
+    const database = ensureDatabase();
+    return await database.createPlan(data);
   } catch (error) {
     console.error("Error creating plan:", error);
     throw error;
@@ -182,7 +233,8 @@ ipcMain.handle("db:create-plan", async (_, data) => {
 
 ipcMain.handle("db:get-plans", async () => {
   try {
-    return await db.getPlans();
+    const database = ensureDatabase();
+    return await database.getPlans();
   } catch (error) {
     console.error("Error getting plans:", error);
     throw error;
@@ -191,7 +243,8 @@ ipcMain.handle("db:get-plans", async () => {
 
 ipcMain.handle("db:get-plan", async (_, id) => {
   try {
-    return await db.getPlan(id);
+    const database = ensureDatabase();
+    return await database.getPlan(id);
   } catch (error) {
     console.error("Error getting plan:", error);
     throw error;
@@ -200,7 +253,8 @@ ipcMain.handle("db:get-plan", async (_, id) => {
 
 ipcMain.handle("db:update-plan", async (_, id, data) => {
   try {
-    return await db.updatePlan(id, data);
+    const database = ensureDatabase();
+    return await database.updatePlan(id, data);
   } catch (error) {
     console.error("Error updating plan:", error);
     throw error;
@@ -209,7 +263,8 @@ ipcMain.handle("db:update-plan", async (_, id, data) => {
 
 ipcMain.handle("db:delete-plan", async (_, id) => {
   try {
-    return await db.deletePlan(id);
+    const database = ensureDatabase();
+    return await database.deletePlan(id);
   } catch (error) {
     console.error("Error deleting plan:", error);
     throw error;
@@ -219,7 +274,8 @@ ipcMain.handle("db:delete-plan", async (_, id) => {
 // Milestone operations
 ipcMain.handle("db:create-milestone", async (_, data) => {
   try {
-    return await db.createMilestone(data);
+    const database = ensureDatabase();
+    return await database.createMilestone(data);
   } catch (error) {
     console.error("Error creating milestone:", error);
     throw error;
@@ -228,7 +284,8 @@ ipcMain.handle("db:create-milestone", async (_, data) => {
 
 ipcMain.handle("db:update-milestone", async (_, id, data) => {
   try {
-    return await db.updateMilestone(id, data);
+    const database = ensureDatabase();
+    return await database.updateMilestone(id, data);
   } catch (error) {
     console.error("Error updating milestone:", error);
     throw error;
@@ -237,7 +294,8 @@ ipcMain.handle("db:update-milestone", async (_, id, data) => {
 
 ipcMain.handle("db:delete-milestone", async (_, id) => {
   try {
-    return await db.deleteMilestone(id);
+    const database = ensureDatabase();
+    return await database.deleteMilestone(id);
   } catch (error) {
     console.error("Error deleting milestone:", error);
     throw error;
@@ -247,7 +305,8 @@ ipcMain.handle("db:delete-milestone", async (_, id) => {
 // Task operations
 ipcMain.handle("db:create-task", async (_, data) => {
   try {
-    return await db.createTask(data);
+    const database = ensureDatabase();
+    return await database.createTask(data);
   } catch (error) {
     console.error("Error creating task:", error);
     throw error;
@@ -256,7 +315,8 @@ ipcMain.handle("db:create-task", async (_, data) => {
 
 ipcMain.handle("db:update-task", async (_, id, data) => {
   try {
-    return await db.updateTask(id, data);
+    const database = ensureDatabase();
+    return await database.updateTask(id, data);
   } catch (error) {
     console.error("Error updating task:", error);
     throw error;
@@ -265,7 +325,8 @@ ipcMain.handle("db:update-task", async (_, id, data) => {
 
 ipcMain.handle("db:delete-task", async (_, id) => {
   try {
-    return await db.deleteTask(id);
+    const database = ensureDatabase();
+    return await database.deleteTask(id);
   } catch (error) {
     console.error("Error deleting task:", error);
     throw error;
@@ -277,7 +338,8 @@ ipcMain.handle(
   "db:create-task-dependency",
   async (_, dependentId, prerequisiteId) => {
     try {
-      return await db.createTaskDependency(dependentId, prerequisiteId);
+      const database = ensureDatabase();
+      return await database.createTaskDependency(dependentId, prerequisiteId);
     } catch (error) {
       console.error("Error creating task dependency:", error);
       throw error;
@@ -289,7 +351,8 @@ ipcMain.handle(
   "db:delete-task-dependency",
   async (_, dependentId, prerequisiteId) => {
     try {
-      return await db.deleteTaskDependency(dependentId, prerequisiteId);
+      const database = ensureDatabase();
+      return await database.deleteTaskDependency(dependentId, prerequisiteId);
     } catch (error) {
       console.error("Error deleting task dependency:", error);
       throw error;
@@ -300,7 +363,8 @@ ipcMain.handle(
 // Resource operations
 ipcMain.handle("db:create-resource", async (_, data) => {
   try {
-    return await db.createResource(data);
+    const database = ensureDatabase();
+    return await database.createResource(data);
   } catch (error) {
     console.error("Error creating resource:", error);
     throw error;
@@ -309,7 +373,8 @@ ipcMain.handle("db:create-resource", async (_, data) => {
 
 ipcMain.handle("db:update-resource", async (_, id, data) => {
   try {
-    return await db.updateResource(id, data);
+    const database = ensureDatabase();
+    return await database.updateResource(id, data);
   } catch (error) {
     console.error("Error updating resource:", error);
     throw error;
@@ -318,7 +383,8 @@ ipcMain.handle("db:update-resource", async (_, id, data) => {
 
 ipcMain.handle("db:delete-resource", async (_, id) => {
   try {
-    return await db.deleteResource(id);
+    const database = ensureDatabase();
+    return await database.deleteResource(id);
   } catch (error) {
     console.error("Error deleting resource:", error);
     throw error;
@@ -328,7 +394,8 @@ ipcMain.handle("db:delete-resource", async (_, id) => {
 // Settings operations
 ipcMain.handle("db:get-settings", async () => {
   try {
-    return await db.getSettings();
+    const database = ensureDatabase();
+    return await database.getSettings();
   } catch (error) {
     console.error("Error getting settings:", error);
     throw error;
@@ -337,7 +404,8 @@ ipcMain.handle("db:get-settings", async () => {
 
 ipcMain.handle("db:update-settings", async (_, data) => {
   try {
-    return await db.updateSettings(data);
+    const database = ensureDatabase();
+    return await database.updateSettings(data);
   } catch (error) {
     console.error("Error updating settings:", error);
     throw error;
@@ -347,7 +415,8 @@ ipcMain.handle("db:update-settings", async (_, data) => {
 // Statistics operations
 ipcMain.handle("db:get-plan-stats", async (_, planId) => {
   try {
-    return await db.getPlanStats(planId);
+    const database = ensureDatabase();
+    return await database.getPlanStats(planId);
   } catch (error) {
     console.error("Error getting plan stats:", error);
     throw error;
@@ -356,7 +425,8 @@ ipcMain.handle("db:get-plan-stats", async (_, planId) => {
 
 ipcMain.handle("db:get-dashboard-stats", async () => {
   try {
-    return await db.getDashboardStats();
+    const database = ensureDatabase();
+    return await database.getDashboardStats();
   } catch (error) {
     console.error("Error getting dashboard stats:", error);
     throw error;

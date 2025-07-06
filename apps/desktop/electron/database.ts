@@ -1,27 +1,169 @@
-import { PrismaClient } from "@prisma/client";
 import path from "path";
 import { app } from "electron";
+import fs from "fs";
+
+// Custom Prisma client import for production
+function createPrismaClient() {
+  const isDev =
+    process.env.NODE_ENV === "development" ||
+    (typeof app !== "undefined" && !app.isPackaged);
+
+  console.log("Creating Prisma client...");
+  console.log("isDev:", isDev);
+  console.log("process.resourcesPath:", process.resourcesPath);
+
+  if (isDev) {
+    // In development, use normal import
+    console.log("Using development Prisma client");
+    const { PrismaClient } = require("@prisma/client");
+    return PrismaClient;
+  } else {
+    // In production, try to load from unpacked directory
+    console.log("Loading production Prisma client...");
+
+    try {
+      const unpackedPath = path.join(
+        process.resourcesPath,
+        "app.asar.unpacked"
+      );
+      console.log("Unpacked path:", unpackedPath);
+      console.log("Unpacked path exists:", fs.existsSync(unpackedPath));
+
+      const prismaClientPath = path.join(
+        unpackedPath,
+        "node_modules",
+        "@prisma",
+        "client"
+      );
+      console.log("Prisma client path:", prismaClientPath);
+      console.log(
+        "Prisma client path exists:",
+        fs.existsSync(prismaClientPath)
+      );
+
+      // Check if the unpacked Prisma client exists
+      const prismaGeneratedPath = path.join(
+        unpackedPath,
+        "dist-electron",
+        ".prisma",
+        "client"
+      );
+
+      console.log(
+        "Checking for generated Prisma client at:",
+        prismaGeneratedPath
+      );
+      console.log(
+        "Generated Prisma client exists:",
+        fs.existsSync(prismaGeneratedPath)
+      );
+
+      if (fs.existsSync(prismaGeneratedPath)) {
+        console.log("Loading Prisma client from generated directory");
+
+        // Set environment variables for Prisma
+        const queryEnginePath = path.join(
+          prismaGeneratedPath,
+          "libquery_engine-darwin-arm64.dylib.node"
+        );
+        console.log("Setting PRISMA_QUERY_ENGINE_LIBRARY to:", queryEnginePath);
+        process.env.PRISMA_QUERY_ENGINE_LIBRARY = queryEnginePath;
+
+        // Load directly from the generated client
+        const { PrismaClient } = require(prismaGeneratedPath);
+        return PrismaClient;
+      } else if (fs.existsSync(prismaClientPath)) {
+        console.log("Loading Prisma client from unpacked @prisma/client");
+        const { PrismaClient } = require(prismaClientPath);
+        return PrismaClient;
+      } else {
+        console.log("No unpacked Prisma client found, using fallback");
+        // Fallback to regular import
+        const { PrismaClient } = require("@prisma/client");
+        return PrismaClient;
+      }
+    } catch (error) {
+      console.error(
+        "Failed to load Prisma client from unpacked directory:",
+        error
+      );
+      console.log("Using fallback Prisma client");
+      // Fallback to regular import
+      const { PrismaClient } = require("@prisma/client");
+      return PrismaClient;
+    }
+  }
+}
 
 export class DatabaseService {
-  private prisma: PrismaClient;
+  private prisma: any;
 
   constructor() {
     // Initialize Prisma client with database path
-    // In development, use the project directory; in production, use app data directory
-    const isDev = process.env.NODE_ENV === "development" || !app.isPackaged;
-    const dbPath = isDev
-      ? path.join(process.cwd(), "prisma", "planforge.db")
-      : path.join(app.getPath("userData"), "planforge.db");
+    const isDev =
+      process.env.NODE_ENV === "development" ||
+      (typeof app !== "undefined" && !app.isPackaged);
+
+    let dbPath: string;
+
+    if (isDev) {
+      // In development, use the project root directory
+      const projectRoot = path.join(__dirname, "..");
+      dbPath = path.join(projectRoot, "prisma", "planforge.db");
+    } else {
+      // In production, use user data directory
+      const userDataPath = app.getPath("userData");
+      dbPath = path.join(userDataPath, "planforge.db");
+
+      // Copy database from resources if it doesn't exist
+      if (!fs.existsSync(dbPath)) {
+        const resourcesPath = process.resourcesPath;
+        const sourcePath = path.join(resourcesPath, "prisma", "planforge.db");
+
+        console.log("Copying database from:", sourcePath);
+        console.log("To:", dbPath);
+
+        try {
+          fs.mkdirSync(path.dirname(dbPath), { recursive: true });
+          fs.copyFileSync(sourcePath, dbPath);
+          console.log("Database copied successfully");
+        } catch (copyError) {
+          console.error("Failed to copy database:", copyError);
+          console.log("Creating new database...");
+        }
+      }
+    }
 
     console.log("Database path:", dbPath);
+    console.log("Database path exists:", fs.existsSync(dbPath));
 
-    this.prisma = new PrismaClient({
-      datasources: {
-        db: {
-          url: `file:${dbPath}`,
+    try {
+      console.log("Initializing Prisma client...");
+      const PrismaClient = createPrismaClient();
+      console.log("PrismaClient constructor obtained:", !!PrismaClient);
+
+      this.prisma = new PrismaClient({
+        datasources: {
+          db: {
+            url: `file:${dbPath}`,
+          },
         },
-      },
-    });
+      });
+      console.log("Prisma client instance created successfully");
+    } catch (error) {
+      console.error("Failed to initialize Prisma client:", error);
+      console.error(
+        "Error details:",
+        error instanceof Error ? error.message : String(error)
+      );
+      console.error(
+        "Error stack:",
+        error instanceof Error ? error.stack : "No stack trace"
+      );
+      throw new Error(
+        "Database initialization failed. Please ensure Prisma client is properly installed."
+      );
+    }
   }
 
   async initialize() {
@@ -29,9 +171,6 @@ export class DatabaseService {
       // Test database connection
       await this.prisma.$connect();
       console.log("Database connected successfully");
-
-      // Run migrations if needed
-      // Note: In production, you might want to handle migrations differently
       return true;
     } catch (error) {
       console.error("Database initialization failed:", error);
@@ -352,19 +491,19 @@ export class DatabaseService {
 
     const totalTasks = plan.tasks.length;
     const completedTasks = plan.tasks.filter(
-      (task) => task.status === "COMPLETED"
+      (task: any) => task.status === "COMPLETED"
     ).length;
     const totalMilestones = plan.milestones.length;
     const completedMilestones = plan.milestones.filter(
-      (milestone) => milestone.status === "COMPLETED"
+      (milestone: any) => milestone.status === "COMPLETED"
     ).length;
 
     const totalEstimatedHours = plan.tasks.reduce(
-      (sum, task) => sum + (task.estimatedHours || 0),
+      (sum: number, task: any) => sum + (task.estimatedHours || 0),
       0
     );
     const totalActualHours = plan.tasks.reduce(
-      (sum, task) => sum + (task.actualHours || 0),
+      (sum: number, task: any) => sum + (task.actualHours || 0),
       0
     );
 
@@ -391,19 +530,21 @@ export class DatabaseService {
     });
 
     const totalPlans = plans.length;
-    const activePlans = plans.filter((plan) => plan.status === "ACTIVE").length;
+    const activePlans = plans.filter(
+      (plan: any) => plan.status === "ACTIVE"
+    ).length;
     const completedPlans = plans.filter(
-      (plan) => plan.status === "COMPLETED"
+      (plan: any) => plan.status === "COMPLETED"
     ).length;
 
-    const allTasks = plans.flatMap((plan) => plan.tasks);
+    const allTasks = plans.flatMap((plan: any) => plan.tasks);
     const totalTasks = allTasks.length;
     const completedTasks = allTasks.filter(
-      (task) => task.status === "COMPLETED"
+      (task: any) => task.status === "COMPLETED"
     ).length;
 
     const overdueTasks = allTasks.filter(
-      (task) =>
+      (task: any) =>
         task.dueDate &&
         task.status !== "COMPLETED" &&
         new Date(task.dueDate) < new Date()
@@ -420,4 +561,15 @@ export class DatabaseService {
         totalTasks > 0 ? (completedTasks / totalTasks) * 100 : 0,
     };
   }
+}
+
+// Global database instance
+let databaseInstance: DatabaseService | null = null;
+
+export async function initDatabase(): Promise<DatabaseService> {
+  if (!databaseInstance) {
+    databaseInstance = new DatabaseService();
+    await databaseInstance.initialize();
+  }
+  return databaseInstance;
 }
