@@ -33,11 +33,34 @@ const Dashboard: React.FC = () => {
     }
   };
 
-  const calculatePlanProgress = (plan: Plan) => {
-    // If plan is completed, show 100% regardless of tasks
-    if (plan.status === "COMPLETED") return 100;
+  // Calculate dynamic plan status based on task completion
+  const calculateDynamicPlanStatus = (plan: Plan): string => {
+    // If plan is manually set to CANCELLED or PAUSED, keep that status
+    if (plan.status === "CANCELLED" || plan.status === "PAUSED") {
+      return plan.status;
+    }
 
-    // If no tasks, show 0% for non-completed plans
+    // If no tasks, use the original status
+    if (!plan.tasks || plan.tasks.length === 0) {
+      return plan.status;
+    }
+
+    // Check if all tasks are completed
+    const completedTasks = plan.tasks.filter(
+      (task) => task.status === "COMPLETED"
+    ).length;
+
+    if (completedTasks === plan.tasks.length) {
+      return "COMPLETED";
+    } else if (completedTasks > 0) {
+      return "ACTIVE";
+    } else {
+      return "ACTIVE";
+    }
+  };
+
+  const calculatePlanProgress = (plan: Plan) => {
+    // If no tasks, show 0%
     if (!plan.tasks || plan.tasks.length === 0) return 0;
 
     const completedTasks = plan.tasks.filter(
@@ -173,83 +196,88 @@ const Dashboard: React.FC = () => {
             </div>
           ) : (
             <div className="grid gap-4">
-              {plans.map((plan) => (
-                <div
-                  key={plan.id}
-                  className="bg-card p-6 rounded-lg border border-border hover:shadow-md transition-shadow"
-                >
-                  <div className="flex items-start justify-between mb-4">
-                    <div className="flex-1">
-                      <div className="flex items-center space-x-3 mb-2">
-                        <h3 className="text-lg font-semibold text-foreground">
-                          {plan.title}
-                        </h3>
-                        <span
-                          className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(
-                            plan.status
-                          )}`}
-                        >
-                          {plan.status}
+              {plans.map((plan) => {
+                const dynamicStatus = calculateDynamicPlanStatus(plan);
+                const progress = calculatePlanProgress(plan);
+
+                return (
+                  <div
+                    key={plan.id}
+                    className="bg-card p-6 rounded-lg border border-border hover:shadow-md transition-shadow"
+                  >
+                    <div className="flex items-start justify-between mb-4">
+                      <div className="flex-1">
+                        <div className="flex items-center space-x-3 mb-2">
+                          <h3 className="text-lg font-semibold text-foreground">
+                            {plan.title}
+                          </h3>
+                          <span
+                            className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(
+                              dynamicStatus
+                            )}`}
+                          >
+                            {dynamicStatus}
+                          </span>
+                        </div>
+                        <p className="text-muted-foreground text-sm mb-2">
+                          {plan.description}
+                        </p>
+                        <p className="text-sm text-foreground font-medium">
+                          Goal: {plan.goal}
+                        </p>
+                      </div>
+                      <div className="text-right">
+                        <div className="text-2xl font-bold text-foreground">
+                          {progress}%
+                        </div>
+                        <div className="text-xs text-muted-foreground">
+                          complete
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Progress Bar */}
+                    <div className="mb-4">
+                      <div className="flex justify-between text-sm text-muted-foreground mb-1">
+                        <span>Progress</span>
+                        <span>
+                          {plan.tasks?.filter(
+                            (task) => task.status === "COMPLETED"
+                          ).length || 0}{" "}
+                          of {plan.tasks?.length || 0} tasks
                         </span>
                       </div>
-                      <p className="text-muted-foreground text-sm mb-2">
-                        {plan.description}
-                      </p>
-                      <p className="text-sm text-foreground font-medium">
-                        Goal: {plan.goal}
-                      </p>
-                    </div>
-                    <div className="text-right">
-                      <div className="text-2xl font-bold text-foreground">
-                        {calculatePlanProgress(plan)}%
+                      <div className="w-full bg-secondary rounded-full h-2">
+                        <div
+                          className="bg-primary h-2 rounded-full transition-all duration-300"
+                          style={{ width: `${progress}%` }}
+                        />
                       </div>
+                    </div>
+
+                    {/* Actions */}
+                    <div className="flex items-center justify-between">
                       <div className="text-xs text-muted-foreground">
-                        complete
+                        Created {new Date(plan.createdAt).toLocaleDateString()}
+                      </div>
+                      <div className="space-x-2">
+                        <Link
+                          to={`/plan/${plan.id}`}
+                          className="text-sm text-primary hover:text-primary/80 transition-colors"
+                        >
+                          View Tasks
+                        </Link>
+                        <Link
+                          to={`/plan/${plan.id}`}
+                          className="text-sm text-primary hover:text-primary/80 transition-colors"
+                        >
+                          Edit Plan
+                        </Link>
                       </div>
                     </div>
                   </div>
-
-                  {/* Progress Bar */}
-                  <div className="mb-4">
-                    <div className="flex justify-between text-sm text-muted-foreground mb-1">
-                      <span>Progress</span>
-                      <span>
-                        {plan.tasks?.filter(
-                          (task) => task.status === "COMPLETED"
-                        ).length || 0}{" "}
-                        of {plan.tasks?.length || 0} tasks
-                      </span>
-                    </div>
-                    <div className="w-full bg-secondary rounded-full h-2">
-                      <div
-                        className="bg-primary h-2 rounded-full transition-all duration-300"
-                        style={{ width: `${calculatePlanProgress(plan)}%` }}
-                      />
-                    </div>
-                  </div>
-
-                  {/* Actions */}
-                  <div className="flex items-center justify-between">
-                    <div className="text-xs text-muted-foreground">
-                      Created {new Date(plan.createdAt).toLocaleDateString()}
-                    </div>
-                    <div className="space-x-2">
-                      <Link
-                        to={`/plan/${plan.id}`}
-                        className="text-sm text-primary hover:text-primary/80 transition-colors"
-                      >
-                        View Tasks
-                      </Link>
-                      <Link
-                        to={`/plan/${plan.id}`}
-                        className="text-sm text-primary hover:text-primary/80 transition-colors"
-                      >
-                        Edit Plan
-                      </Link>
-                    </div>
-                  </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           )}
         </div>

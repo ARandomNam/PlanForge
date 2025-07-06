@@ -187,11 +187,36 @@ const PlanDetail: React.FC = () => {
     }
   };
 
-  const calculateProgress = () => {
-    // If plan is completed, show 100% regardless of tasks
-    if (plan?.status === "COMPLETED") return 100;
+  // Calculate dynamic plan status based on task completion
+  const calculateDynamicPlanStatus = (): string => {
+    if (!plan) return "ACTIVE";
 
-    // If no tasks, show 0% for non-completed plans
+    // If plan is manually set to CANCELLED or PAUSED, keep that status
+    if (plan.status === "CANCELLED" || plan.status === "PAUSED") {
+      return plan.status;
+    }
+
+    // If no tasks, use the original status
+    if (!plan.tasks || plan.tasks.length === 0) {
+      return plan.status;
+    }
+
+    // Check if all tasks are completed
+    const completedTasks = plan.tasks.filter(
+      (task) => task.status === "COMPLETED"
+    ).length;
+
+    if (completedTasks === plan.tasks.length) {
+      return "COMPLETED";
+    } else if (completedTasks > 0) {
+      return "ACTIVE";
+    } else {
+      return "ACTIVE";
+    }
+  };
+
+  const calculateProgress = () => {
+    // If no tasks, show 0%
     if (!plan?.tasks || plan.tasks.length === 0) return 0;
 
     const completedTasks = plan.tasks.filter(
@@ -339,10 +364,10 @@ const PlanDetail: React.FC = () => {
                   </h2>
                   <span
                     className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(
-                      plan.status
+                      calculateDynamicPlanStatus()
                     )}`}
                   >
-                    {plan.status}
+                    {calculateDynamicPlanStatus()}
                   </span>
                 </div>
                 <p className="text-muted-foreground mb-4">{plan.description}</p>
@@ -648,14 +673,16 @@ const PlanDetail: React.FC = () => {
             {aiSuggestions.map((suggestion, index) => (
               <div
                 key={index}
-                className="bg-blue-50 border border-blue-200 rounded-lg p-4"
+                className="bg-blue-50 dark:bg-blue-950 border border-blue-200 dark:border-blue-800 rounded-lg p-4"
               >
                 <div className="flex items-start space-x-3">
-                  <div className="w-6 h-6 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center text-sm font-semibold flex-shrink-0">
+                  <div className="w-6 h-6 bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-400 rounded-full flex items-center justify-center text-sm font-semibold flex-shrink-0">
                     {index + 1}
                   </div>
                   <div className="flex-1">
-                    <p className="text-sm text-blue-800">{suggestion}</p>
+                    <p className="text-sm text-blue-800 dark:text-blue-200">
+                      {suggestion}
+                    </p>
                   </div>
                 </div>
               </div>

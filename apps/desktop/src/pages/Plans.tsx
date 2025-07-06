@@ -35,6 +35,32 @@ const Plans: React.FC = () => {
     }
   };
 
+  // Calculate dynamic plan status based on task completion
+  const calculateDynamicPlanStatus = (plan: Plan): string => {
+    // If plan is manually set to CANCELLED or PAUSED, keep that status
+    if (plan.status === "CANCELLED" || plan.status === "PAUSED") {
+      return plan.status;
+    }
+
+    // If no tasks, use the original status
+    if (!plan.tasks || plan.tasks.length === 0) {
+      return plan.status;
+    }
+
+    // Check if all tasks are completed
+    const completedTasks = plan.tasks.filter(
+      (task) => task.status === "COMPLETED"
+    ).length;
+
+    if (completedTasks === plan.tasks.length) {
+      return "COMPLETED";
+    } else if (completedTasks > 0) {
+      return "ACTIVE";
+    } else {
+      return "ACTIVE";
+    }
+  };
+
   const getStatusIcon = (status: string) => {
     switch (status) {
       case "COMPLETED":
@@ -67,7 +93,7 @@ const Plans: React.FC = () => {
 
   const calculateProgress = (plan: Plan) => {
     if (!plan.tasks || plan.tasks.length === 0) {
-      return plan.status === "COMPLETED" ? 100 : 0;
+      return 0;
     }
     const completedTasks = plan.tasks.filter(
       (task) => task.status === "COMPLETED"
@@ -76,12 +102,13 @@ const Plans: React.FC = () => {
   };
 
   const filteredPlans = plans.filter((plan) => {
+    const dynamicStatus = calculateDynamicPlanStatus(plan);
     const matchesSearch =
       plan.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
       plan.description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       plan.goal.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesStatus =
-      statusFilter === "all" || plan.status === statusFilter;
+      statusFilter === "all" || dynamicStatus === statusFilter;
     return matchesSearch && matchesStatus;
   });
 
@@ -162,6 +189,7 @@ const Plans: React.FC = () => {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 theme-transition-bottom">
           {filteredPlans.map((plan) => {
+            const dynamicStatus = calculateDynamicPlanStatus(plan);
             const progress = calculateProgress(plan);
             return (
               <div
@@ -176,13 +204,13 @@ const Plans: React.FC = () => {
                         {plan.title}
                       </h3>
                       <div className="flex items-center gap-2">
-                        {getStatusIcon(plan.status)}
+                        {getStatusIcon(dynamicStatus)}
                         <span
                           className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(
-                            plan.status
+                            dynamicStatus
                           )}`}
                         >
-                          {plan.status}
+                          {dynamicStatus}
                         </span>
                       </div>
                     </div>

@@ -562,14 +562,16 @@ const NewPlan: React.FC = () => {
                   <h4 className="text-lg font-semibold text-foreground mb-4">
                     Success Tips
                   </h4>
-                  <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
+                  <div className="bg-blue-50 dark:bg-blue-950 p-4 rounded-lg border border-blue-200 dark:border-blue-800">
                     <ul className="space-y-2">
                       {generatedPlan.tips.map((tip, index) => (
                         <li
                           key={index}
-                          className="text-sm text-blue-700 flex items-start space-x-2"
+                          className="text-sm text-blue-700 dark:text-blue-300 flex items-start space-x-2"
                         >
-                          <span className="text-blue-500 mt-1">•</span>
+                          <span className="text-blue-500 dark:text-blue-400 mt-1">
+                            •
+                          </span>
                           <span>{tip}</span>
                         </li>
                       ))}

@@ -270,14 +270,14 @@ const Settings: React.FC = () => {
               </div>
             </div>
 
-            <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
+            <div className="bg-blue-50 dark:bg-blue-950 p-4 rounded-lg border border-blue-200 dark:border-blue-800">
               <div className="flex items-start space-x-3">
-                <AlertCircle className="h-5 w-5 text-blue-600 mt-0.5" />
+                <AlertCircle className="h-5 w-5 text-blue-600 dark:text-blue-400 mt-0.5" />
                 <div className="text-sm">
-                  <div className="font-medium text-blue-900 mb-1">
+                  <div className="font-medium text-blue-900 dark:text-blue-100 mb-1">
                     Your API key is stored securely
                   </div>
-                  <div className="text-blue-700">
+                  <div className="text-blue-700 dark:text-blue-300">
                     Your OpenAI API key is encrypted and stored locally on your
                     device. It's never sent to our servers. You can get your API
                     key from{" "}
@@ -285,7 +285,7 @@ const Settings: React.FC = () => {
                       href="https://platform.openai.com/api-keys"
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="underline hover:no-underline"
+                      className="underline hover:no-underline text-blue-600 dark:text-blue-400"
                     >
                       OpenAI's platform
                     </a>
@@ -413,18 +413,18 @@ const Settings: React.FC = () => {
 
             {/* Success Messages */}
             {exportSuccess && (
-              <div className="flex items-center space-x-2 p-3 bg-green-50 border border-green-200 rounded-lg">
-                <Check className="h-4 w-4 text-green-600" />
-                <span className="text-sm text-green-700">
+              <div className="flex items-center space-x-2 p-3 bg-green-50 dark:bg-green-950 border border-green-200 dark:border-green-800 rounded-lg">
+                <Check className="h-4 w-4 text-green-600 dark:text-green-400" />
+                <span className="text-sm text-green-700 dark:text-green-300">
                   Data exported successfully!
                 </span>
               </div>
             )}
 
             {importSuccess && (
-              <div className="flex items-center space-x-2 p-3 bg-green-50 border border-green-200 rounded-lg">
-                <Check className="h-4 w-4 text-green-600" />
-                <span className="text-sm text-green-700">
+              <div className="flex items-center space-x-2 p-3 bg-green-50 dark:bg-green-950 border border-green-200 dark:border-green-800 rounded-lg">
+                <Check className="h-4 w-4 text-green-600 dark:text-green-400" />
+                <span className="text-sm text-green-700 dark:text-green-300">
                   Data imported successfully!
                 </span>
               </div>
