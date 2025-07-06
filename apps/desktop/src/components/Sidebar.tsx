@@ -66,32 +66,50 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onToggle }) => {
       }`}
     >
       {/* Header */}
-      <div className="flex items-center justify-between p-4 border-b border-border theme-transition-top">
-        <div
-          className={`flex items-center space-x-3 ${
-            isOpen ? "opacity-100" : "opacity-0"
-          } transition-opacity duration-300 ease-in-out`}
-        >
-          <Target className="h-8 w-8 text-primary sidebar-icon" />
-          <h1 className="text-xl font-bold text-foreground sidebar-text">
-            PlanForge
-          </h1>
-        </div>
-        <button
-          onClick={onToggle}
-          className="p-2 rounded-lg hover:bg-accent hover:text-accent-foreground sidebar-button"
-          aria-label={isOpen ? "Collapse sidebar" : "Expand sidebar"}
-        >
-          {isOpen ? (
-            <ChevronLeft className="h-4 w-4 sidebar-icon" />
-          ) : (
-            <ChevronRight className="h-4 w-4 sidebar-icon" />
-          )}
-        </button>
+      <div className="h-16 flex items-center border-b border-border theme-transition-top px-2">
+        {isOpen ? (
+          <>
+            {/* Logo - When expanded */}
+            <div className="flex items-center justify-center w-10 h-10 flex-shrink-0">
+              <Target className="h-6 w-6 text-primary sidebar-icon" />
+            </div>
+
+            {/* Title */}
+            <h1 className="ml-3 text-xl font-bold text-foreground sidebar-text truncate flex-1">
+              PlanForge
+            </h1>
+
+            {/* Toggle Button */}
+            <button
+              onClick={onToggle}
+              className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-accent hover:text-accent-foreground sidebar-button flex-shrink-0"
+              aria-label="Collapse sidebar"
+            >
+              <ChevronLeft className="h-4 w-4 sidebar-icon" />
+            </button>
+          </>
+        ) : (
+          /* Collapsed state - Center everything */
+          <div className="w-full flex flex-col items-center justify-center space-y-1">
+            {/* Logo centered */}
+            <div className="flex items-center justify-center w-8 h-8">
+              <Target className="h-5 w-5 text-primary sidebar-icon" />
+            </div>
+
+            {/* Toggle Button below logo */}
+            <button
+              onClick={onToggle}
+              className="w-6 h-6 flex items-center justify-center rounded hover:bg-accent hover:text-accent-foreground sidebar-button"
+              aria-label="Expand sidebar"
+            >
+              <ChevronRight className="h-3 w-3 sidebar-icon" />
+            </button>
+          </div>
+        )}
       </div>
 
       {/* Navigation */}
-      <nav className="p-4 space-y-2 theme-transition-middle">
+      <nav className="p-3 space-y-1 theme-transition-middle">
         {navigationItems.map((item) => {
           const Icon = item.icon;
           const isActive = location.pathname === item.path;
@@ -100,32 +118,57 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onToggle }) => {
             <Link
               key={item.path}
               to={item.path}
-              className={`flex items-center space-x-3 p-3 rounded-lg sidebar-button group ${
+              className={`group flex items-center rounded-lg transition-all duration-200 ${
+                isOpen ? "h-14 px-3" : "h-12 px-2"
+              } ${
                 isActive
-                  ? "sidebar-nav-active"
-                  : "hover:bg-accent hover:text-accent-foreground"
+                  ? "bg-primary text-primary-foreground shadow-sm"
+                  : "text-foreground hover:bg-accent hover:text-accent-foreground"
               }`}
             >
-              <Icon className="h-5 w-5 flex-shrink-0 sidebar-icon" />
+              {/* Icon Container - Fixed width */}
               <div
-                className={`${
-                  isOpen ? "opacity-100" : "opacity-0"
-                } transition-opacity duration-300 ease-in-out overflow-hidden`}
+                className={`flex items-center justify-center flex-shrink-0 ${
+                  isOpen ? "w-8 h-8" : "w-6 h-6"
+                }`}
               >
-                <div className="font-medium sidebar-text">{item.label}</div>
-                {isOpen && (
-                  <div className="text-xs opacity-70 sidebar-text">
+                <Icon
+                  className={`${isOpen ? "h-5 w-5" : "h-4 w-4"} ${
+                    isActive
+                      ? "text-primary-foreground"
+                      : "text-muted-foreground group-hover:text-foreground"
+                  }`}
+                />
+              </div>
+
+              {/* Text Content - Only show when expanded */}
+              {isOpen && (
+                <div className="ml-3 flex-1 min-w-0">
+                  <div
+                    className={`font-medium text-sm truncate ${
+                      isActive ? "text-primary-foreground" : "text-foreground"
+                    }`}
+                  >
+                    {item.label}
+                  </div>
+                  <div
+                    className={`text-xs truncate ${
+                      isActive
+                        ? "text-primary-foreground/70"
+                        : "text-muted-foreground"
+                    }`}
+                  >
                     {item.description}
                   </div>
-                )}
-              </div>
+                </div>
+              )}
             </Link>
           );
         })}
       </nav>
 
       {/* Footer */}
-      <div className="absolute bottom-4 left-4 right-4 space-y-4 theme-transition-bottom">
+      <div className="absolute bottom-0 left-0 right-0 p-3 space-y-3 theme-transition-bottom">
         {/* Theme Toggle */}
         <button
           onClick={() => {
@@ -137,29 +180,47 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onToggle }) => {
                 : "light";
             setTheme(nextTheme);
           }}
-          className="w-full flex items-center justify-center p-2 rounded-lg hover:bg-accent hover:text-accent-foreground sidebar-button"
+          className={`w-full flex items-center rounded-lg hover:bg-accent hover:text-accent-foreground sidebar-button transition-colors ${
+            isOpen ? "h-12 px-3" : "h-10 px-2"
+          }`}
           title={`Current theme: ${theme}`}
         >
-          {actualTheme === "dark" ? (
-            <Moon className="h-4 w-4 sidebar-icon" />
-          ) : (
-            <Sun className="h-4 w-4 sidebar-icon" />
-          )}
+          {/* Icon Container */}
+          <div
+            className={`flex items-center justify-center flex-shrink-0 ${
+              isOpen ? "w-8 h-8" : "w-6 h-6"
+            }`}
+          >
+            {actualTheme === "dark" ? (
+              <Moon
+                className={`text-muted-foreground ${
+                  isOpen ? "h-4 w-4" : "h-4 w-4"
+                }`}
+              />
+            ) : (
+              <Sun
+                className={`text-muted-foreground ${
+                  isOpen ? "h-4 w-4" : "h-4 w-4"
+                }`}
+              />
+            )}
+          </div>
+
+          {/* Text */}
           {isOpen && (
-            <span className="ml-2 text-sm capitalize sidebar-text">
+            <span className="ml-3 text-sm text-foreground capitalize">
               {theme}
             </span>
           )}
         </button>
 
-        <div
-          className={`text-xs text-muted-foreground ${
-            isOpen ? "opacity-100" : "opacity-0"
-          } transition-opacity duration-300 ease-in-out`}
-        >
-          <div className="font-medium sidebar-text">PlanForge v1.0.0</div>
-          <div className="sidebar-text">AI-powered planning</div>
-        </div>
+        {/* Version Info - Only show when expanded */}
+        {isOpen && (
+          <div className="text-xs text-muted-foreground space-y-1 px-3">
+            <div className="font-medium">PlanForge v1.0.0</div>
+            <div>AI-powered planning</div>
+          </div>
+        )}
       </div>
     </div>
   );

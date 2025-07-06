@@ -101,37 +101,10 @@
       color 0.15s ease-in-out !important;
   }
 
-  /* 侧边栏文字快速过渡 - 直接指定颜色而不依赖CSS变量 */
-  .sidebar-text {
-    color: hsl(222.2, 84%, 4.9%);
-    transition: color 0.15s ease-out !important;
-  }
-
-  .dark .sidebar-text {
-    color: hsl(210, 40%, 98%) !important;
-  }
-
-  /* 侧边栏图标快速过渡 */
-  .sidebar-icon {
-    color: hsl(221.2, 83.2%, 53.3%);
-    transition: color 0.15s ease-out !important;
-  }
-
-  .dark .sidebar-icon {
-    color: hsl(217.2, 91.2%, 59.8%) !important;
-  }
-
   /* 侧边栏背景快速过渡 - 遵循从上到下的模式 */
   .sidebar-bg {
-    background-color: hsl(0, 0%, 100%);
-    border-color: hsl(214.3, 31.8%, 91.4%);
     transition: background-color 0.2s ease-out, border-color 0.2s ease-out !important;
     transition-delay: 25ms; /* 介于顶部和中部之间 */
-  }
-
-  .dark .sidebar-bg {
-    background-color: hsl(217.2, 32.6%, 15.5%) !important;
-    border-color: hsl(217.2, 32.6%, 17.5%) !important;
   }
 
   /* 侧边栏按钮快速过渡 */
@@ -139,25 +112,14 @@
     transition: background-color 0.15s ease-out, color 0.15s ease-out !important;
   }
 
-  .sidebar-button:hover {
-    background-color: hsl(210, 40%, 96%);
-    color: hsl(222.2, 84%, 4.9%);
+  /* 侧边栏图标快速过渡 */
+  .sidebar-icon {
+    transition: color 0.15s ease-out !important;
   }
 
-  .dark .sidebar-button:hover {
-    background-color: hsl(217.2, 32.6%, 17.5%) !important;
-    color: hsl(210, 40%, 98%) !important;
-  }
-
-  /* 活跃的导航项 */
-  .sidebar-nav-active {
-    background-color: hsl(221.2, 83.2%, 53.3%);
-    color: hsl(210, 40%, 98%);
-  }
-
-  .dark .sidebar-nav-active {
-    background-color: hsl(217.2, 91.2%, 59.8%) !important;
-    color: hsl(222.2, 84%, 4.9%) !important;
+  /* 侧边栏文字快速过渡 */
+  .sidebar-text {
+    transition: color 0.15s ease-out !important;
   }
 
   /* 任务卡片暗色模式样式 */

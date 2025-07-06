@@ -7,19 +7,18 @@ const electron = require("electron");
 const node_url = require("node:url");
 const path$1 = require("node:path");
 const os = require("node:os");
-const require$$0 = require(".prisma/client/default");
+const require$$0 = require(".prisma/client/index-browser");
 const path = require("path");
 var _documentCurrentScript = typeof document !== "undefined" ? document.currentScript : null;
-var _default = {
-  ...require$$0
-};
+const prisma = require$$0;
+var indexBrowser = prisma;
 class DatabaseService {
   constructor() {
     __publicField(this, "prisma");
     const isDev = process.env.NODE_ENV === "development" || !electron.app.isPackaged;
     const dbPath = isDev ? path.join(process.cwd(), "prisma", "planforge.db") : path.join(electron.app.getPath("userData"), "planforge.db");
     console.log("Database path:", dbPath);
-    this.prisma = new _default.PrismaClient({
+    this.prisma = new indexBrowser.PrismaClient({
       datasources: {
         db: {
           url: `file:${dbPath}`
