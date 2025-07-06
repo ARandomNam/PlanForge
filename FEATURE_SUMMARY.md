@@ -1,123 +1,123 @@
-# PlanForge 功能更新总结
+# PlanForge Feature Update Summary
 
-## 🎉 新增功能
+## 🎉 New Features
 
-### 1. 📋 专门的 Plans 页面
+### 1. 📋 Dedicated Plans Page
 
-- **路径**: `/plans`
-- **功能**:
-  - 网格布局显示所有计划
-  - 搜索和过滤功能（按状态筛选）
-  - 进度可视化
-  - 点击卡片跳转到详细页面
-  - 响应式设计
+- **Path**: `/plans`
+- **Features**:
+  - Grid layout displaying all plans
+  - Search and filter functionality (filter by status)
+  - Progress visualization
+  - Click cards to navigate to detail page
+  - Responsive design
 
-### 2. 🎯 任务拖拽功能
+### 2. 🎯 Task Drag and Drop
 
-- **技术**: 使用 @dnd-kit 库实现
-- **功能**:
-  - 任务卡片可在 Kanban 看板的不同状态栏之间拖拽
-  - 拖拽时显示视觉反馈
-  - 拖拽结束自动更新任务状态到数据库
-  - 支持触摸设备
+- **Technology**: Implemented using @dnd-kit library
+- **Features**:
+  - Task cards can be dragged between different status columns in Kanban board
+  - Visual feedback during dragging
+  - Automatic database update when drag ends
+  - Touch device support
 
-### 3. 🌓 主题切换功能
+### 3. 🌓 Theme Switching
 
-- **技术**: React Context + localStorage
-- **功能**:
-  - 支持 Light、Dark、System 三种模式
-  - System 模式自动跟随系统主题
-  - 实时切换，无需重启应用
-  - 主题设置持久化存储
-  - 侧边栏快速切换按钮
+- **Technology**: React Context + localStorage
+- **Features**:
+  - Support for Light, Dark, and System modes
+  - System mode automatically follows system theme
+  - Real-time switching without app restart
+  - Persistent theme settings storage
+  - Quick toggle button in sidebar
 
-### 4. 🌍 语言设置简化
+### 4. 🌍 Language Settings Simplified
 
-- **更新**: 移除未实现的语言选项
-- **当前**: 仅显示 English 和 "More coming soon..."
-- **UI**: 禁用状态的选项显示为灰色斜体
+- **Update**: Removed unimplemented language options
+- **Current**: Only shows English and "More coming soon..."
+- **UI**: Disabled options displayed in gray italics
 
-## 🔧 技术改进
+## 🔧 Technical Improvements
 
-### 导航结构优化
+### Navigation Structure Optimization
 
-- 在侧边栏添加了 Plans 页面链接
-- 更新了路由配置
-- 改进了页面间的导航体验
+- Added Plans page link to sidebar
+- Updated route configuration
+- Improved navigation experience between pages
 
-### 代码架构
+### Code Architecture
 
-- 创建了 ThemeContext 用于主题管理
-- 完善了 PlanContext 的数据库集成
-- 优化了组件结构和可复用性
+- Created ThemeContext for theme management
+- Enhanced PlanContext database integration
+- Optimized component structure and reusability
 
-### 用户体验
+### User Experience
 
-- 统一的设计语言
-- 流畅的动画和过渡效果
-- 响应式布局适配不同屏幕尺寸
-- 直观的拖拽交互
+- Unified design language
+- Smooth animations and transitions
+- Responsive layout for different screen sizes
+- Intuitive drag interaction
 
-## 📱 页面结构更新
+## 📱 Page Structure Update
 
 ```
 PlanForge/
-├── Dashboard (/)           - 概览和统计
-├── Plans (/plans)          - 计划列表页面 [新增]
-├── New Plan (/new-plan)    - 创建新计划
-├── Plan Detail (/plan/:id) - 计划详情
-├── Tasks (/tasks)          - 任务看板 [增强拖拽]
-├── Calendar (/calendar)    - 日历视图
-└── Settings (/settings)    - 设置页面 [增强主题切换]
+├── Dashboard (/)           - Overview and statistics
+├── Plans (/plans)          - Plans list page [NEW]
+├── New Plan (/new-plan)    - Create new plan
+├── Plan Detail (/plan/:id) - Plan details
+├── Tasks (/tasks)          - Task kanban [ENHANCED with drag & drop]
+├── Calendar (/calendar)    - Calendar view
+└── Settings (/settings)    - Settings page [ENHANCED with theme switching]
 ```
 
-## 🎨 主题系统
+## 🎨 Theme System
 
-### 支持的主题
+### Supported Themes
 
-- **Light**: 明亮主题，适合白天使用
-- **Dark**: 暗色主题，适合夜间使用
-- **System**: 自动跟随系统设置
+- **Light**: Bright theme, suitable for daytime use
+- **Dark**: Dark theme, suitable for nighttime use
+- **System**: Automatically follows system settings
 
-### 切换方式
+### Switching Methods
 
-1. 设置页面中的主题选择器
-2. 侧边栏底部的快速切换按钮
+1. Theme selector in Settings page
+2. Quick toggle button at bottom of sidebar
 
-### 技术实现
+### Technical Implementation
 
-- CSS 变量系统支持动态主题切换
-- localStorage 持久化用户偏好
-- MediaQuery 监听系统主题变化
+- CSS variables system supports dynamic theme switching
+- localStorage persists user preferences
+- MediaQuery listens for system theme changes
 
-## 🚀 使用指南
+## 🚀 Usage Guide
 
-### Plans 页面
+### Plans Page
 
-1. 点击侧边栏的 "Plans" 进入计划列表
-2. 使用搜索框快速查找计划
-3. 使用状态筛选器过滤计划
-4. 点击计划卡片查看详情
+1. Click "Plans" in sidebar to enter plans list
+2. Use search box to quickly find plans
+3. Use status filter to filter plans
+4. Click plan cards to view details
 
-### 任务拖拽
+### Task Drag & Drop
 
-1. 在 Tasks 页面打开 Kanban 看板
-2. 点击并拖拽任务卡片到目标状态栏
-3. 释放鼠标完成状态更新
+1. Open Kanban board in Tasks page
+2. Click and drag task cards to target status column
+3. Release mouse to complete status update
 
-### 主题切换
+### Theme Switching
 
-1. 方式一：设置页面 → Appearance → Theme
-2. 方式二：侧边栏底部的主题切换按钮
+1. Method 1: Settings page → Appearance → Theme
+2. Method 2: Theme toggle button at bottom of sidebar
 
-## 🔮 后续规划
+## 🔮 Future Plans
 
-- [ ] 添加更多语言支持
-- [ ] 增强拖拽功能（任务排序）
-- [ ] 主题自定义选项
-- [ ] 导出/导入功能完善
-- [ ] 性能优化和缓存
+- [ ] Add more language support
+- [ ] Enhance drag functionality (task ordering)
+- [ ] Theme customization options
+- [ ] Improve export/import functionality
+- [ ] Performance optimization and caching
 
 ---
 
-_更新时间: 2025 年 1 月_
+_Updated: January 2025_
